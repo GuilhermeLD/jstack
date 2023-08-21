@@ -13,7 +13,7 @@ class ConctatController {
     const { id } = request.params;
 
     const contact = await ContactsRepository.findById(id);
-    response.json(request.params);
+
 
     if (!contact) {
       return response.status(404).json({ error: 'User not found'})
@@ -23,16 +23,40 @@ class ConctatController {
 
   }
 
-  store() {
+  async store(request, response) {
     // criar
+    const { name, email, phone, category_id } = request.body;
+
+    const contactExists = await ContactsRepository.findByEmail(email);
+
+    if (contactExists) {
+      return response.status(400).json({ error: 'This email is already been taken' });
+    }
+
+    const contact = await ContactsRepository.create({
+      name, email, phone, category_id
+    });
+
+    response.json(contact)
   }
 
   update() {
     // editar
   }
 
-  delete() {
+  async delete(request, response) {
     // delete
+    const { id } = request.params;
+
+    const contact = await ContactsRepository.findById(id);
+
+
+    if (!contact) {
+      return response.status(404).json({ error: 'User not found'})
+    }
+
+    await ContactsRepository.delete(id);
+    response.sendStatus(204);
   }
 }
 
